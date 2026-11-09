@@ -1,5 +1,7 @@
 package com.example.mylauncher
 
+import android.app.Activity
+import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -12,57 +14,84 @@ import android.os.Bundle
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
-import android.widget.Button
+import android.view.WindowManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
-import android.app.Activity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : Activity() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var drawer: LinearLayout
     private lateinit var drawerAdapter: AppGridAdapter
+    private lateinit var dock: LinearLayout
+    private lateinit var pageDots: LinearLayout
     private var allApps: List<AppInfo> = emptyList()
     private var receiverRegistered = false
-    private var currentAccent: Int = 0xFF4F8CFF.toInt()
+    private var currentAccent: Int = 0xFFB9D7FF.toInt()
 
     private val wallpaperReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == Intent.ACTION_WALLPAPER_CHANGED) {
-                refreshWallpaperTheme()
-            }
+            if (intent?.action == Intent.ACTION_WALLPAPER_CHANGED) applyWallpaperBackground()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         setContentView(R.layout.activity_main)
 
         viewPager = findViewById(R.id.homeViewPager)
         drawer = findViewById(R.id.appDrawerContainer)
+        dock = findViewById(R.id.dockContainer)
+        pageDots = findViewById(R.id.pageDots)
 
+        updateDateAndClock()
+        applyWallpaperBackground()
         loadApps()
         setupWorkspace()
         setupDrawer()
+        setupDock()
         setupButtons()
+    }
+
+    private fun updateDateAndClock() {
+        val now = Date()
+        findViewById<TextView>(R.id.clockText).text = SimpleDateFormat("h:mm", Locale.getDefault()).format(now)
+        findViewById<TextView>(R.id.dateText).text = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(now)
+    }
+
+    private fun applyWallpaperBackground() {
+        try {
+            val wallpaper = WallpaperManager.getInstance(this).drawable
+            findViewById<View>(R.id.rootContainer)?.background = wallpaper
+        } catch (_: Exception) {
+            findViewById<View>(R.id.rootContainer)?.setBackgroundColor(0xFF263449.toInt())
+        }
     }
 
     private fun loadApps() {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
         allApps = packageManager.queryIntentActivities(intent, 0)
             .mapNotNull { resolve ->
-                val activityInfo = resolve.activityInfo ?: return@mapNotNull null
-                AppInfo(
-                    label = resolve.loadLabel(packageManager).toString(),
-                    packageName = activityInfo.packageName,
-                    icon = resolve.loadIcon(packageManager)
-                )
+                val info = resolve.activityInfo ?: return@mapNotNull null
+                AppInfo(resolve.loadLabel(packageManager).toString(), info.packageName, resolve.loadIcon(packageManager))
             }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
@@ -71,27 +100,67 @@ class MainActivity : Activity() {
     private fun launchApp(app: AppInfo) {
         val launchIntent = packageManager.getLaunchIntentForPackage(app.packageName)
         if (launchIntent != null) {
-            try {
-                startActivity(launchIntent)
-            } catch (_: Exception) {
-                Toast.makeText(this, "Unable to open app", Toast.LENGTH_SHORT).show()
-            }
+            try { startActivity(launchIntent) }
+            catch (_: Exception) { Toast.makeText(this, "Unable to open app", Toast.LENGTH_SHORT).show() }
         }
     }
 
     private fun setupWorkspace() {
-        val pageSize = 16
-        val pages = if (allApps.isEmpty()) {
-            listOf(emptyList())
-        } else {
-            allApps.chunked(pageSize)
-        }
-
+        val pages = if (allApps.isEmpty()) listOf(emptyList()) else allApps.chunked(20)
         viewPager.adapter = WorkspaceAdapter(pages, ::launchApp)
         viewPager.setPageTransformer(ColorOSPageTransformer(this))
         viewPager.offscreenPageLimit = 1
         viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         viewPager.getChildAt(0).overScrollMode = View.OVER_SCROLL_NEVER
+        renderPageDots(pages.size)
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) = updatePageDots(position)
+        })
+    }
+
+    private fun renderPageDots(count: Int) {
+        pageDots.removeAllViews()
+        repeat(count.coerceAtLeast(1)) { index ->
+            val dot = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(if (index == 0) dp(18) else dp(6), dp(6)).apply {
+                    marginStart = dp(3); marginEnd = dp(3)
+                }
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = dp(6).toFloat()
+                    setColor(if (index == 0) Color.WHITE else 0x77FFFFFF)
+                }
+            }
+            pageDots.addView(dot)
+        }
+    }
+
+    private fun updatePageDots(selected: Int) {
+        for (i in 0 until pageDots.childCount) {
+            val dot = pageDots.getChildAt(i)
+            val params = dot.layoutParams as LinearLayout.LayoutParams
+            params.width = if (i == selected) dp(18) else dp(6)
+            dot.layoutParams = params
+            (dot.background as? GradientDrawable)?.setColor(if (i == selected) Color.WHITE else 0x77FFFFFF)
+        }
+    }
+
+    private fun setupDock() {
+        dock.removeAllViews()
+        val preferred = listOf("com.google.android.dialer", "com.android.phone", "com.google.android.apps.messaging", "com.android.messaging", "com.android.chrome", "com.google.android.apps.photos")
+        val chosen = preferred.mapNotNull { pkg -> allApps.firstOrNull { it.packageName == pkg } }.distinctBy { it.packageName }.take(5)
+        val fallback = allApps.filter { app -> chosen.none { it.packageName == app.packageName } }.take((5 - chosen.size).coerceAtLeast(0))
+        (chosen + fallback).forEach { app ->
+            val icon = ImageView(this).apply {
+                setImageDrawable(app.icon)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                contentDescription = app.label
+                setPadding(dp(9), dp(9), dp(9), dp(9))
+                layoutParams = LinearLayout.LayoutParams(0, dp(62), 1f)
+                setOnClickListener { launchApp(app) }
+            }
+            dock.addView(icon)
+        }
     }
 
     private fun setupDrawer() {
@@ -100,81 +169,56 @@ class MainActivity : Activity() {
         drawerAdapter = AppGridAdapter(::launchApp)
         recycler.adapter = drawerAdapter
         drawerAdapter.submitList(allApps)
-
-        findViewById<EditText>(R.id.searchBar).addTextChangedListener(
-            object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val query = s?.toString()?.trim().orEmpty()
-                    drawerAdapter.submitList(
-                        if (query.isEmpty()) allApps
-                        else allApps.filter { it.label.contains(query, ignoreCase = true) }
-                    )
-                }
-                override fun afterTextChanged(s: Editable?) = Unit
+        findViewById<EditText>(R.id.searchBar).addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s?.toString()?.trim().orEmpty()
+                drawerAdapter.submitList(if (query.isEmpty()) allApps else allApps.filter { it.label.contains(query, true) })
             }
-        )
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
     }
 
     private fun setupButtons() {
-        findViewById<Button>(R.id.drawerButton).setOnClickListener {
+        findViewById<TextView>(R.id.drawerButton).setOnClickListener {
             drawer.visibility = View.VISIBLE
+            findViewById<EditText>(R.id.searchBar).setText("")
         }
-
-        findViewById<Button>(R.id.closeDrawerButton).setOnClickListener {
-            drawer.visibility = View.GONE
-        }
-
-        findViewById<Button>(R.id.fluidCloudButton).setOnClickListener {
+        findViewById<TextView>(R.id.closeDrawerButton).setOnClickListener { drawer.visibility = View.GONE }
+        findViewById<TextView>(R.id.fluidCloudButton).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
-                startActivity(
-                    Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName")
-                    )
-                )
+                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
             } else {
-                ContextCompat.startForegroundService(
-                    this,
-                    Intent(this, FluidCloudService::class.java)
-                )
+                ContextCompat.startForegroundService(this, Intent(this, FluidCloudService::class.java))
             }
         }
     }
 
     private fun refreshWallpaperTheme() {
         val bitmap = WallpaperColorHelper.getWallpaperBitmap(this) ?: return
-
         ColorPaletteEngine.extractColorsFromWallpaper(bitmap) { colors ->
             if (isFinishing || isDestroyed) return@extractColorsFromWallpaper
-
             currentAccent = colors.vibrantAccent
-            findViewById<Button>(R.id.drawerButton)
-                .backgroundTintList = android.content.res.ColorStateList.valueOf(currentAccent)
-            findViewById<Button>(R.id.fluidCloudButton)
-                .backgroundTintList = android.content.res.ColorStateList.valueOf(currentAccent)
-
             drawerAdapter.setLabelColor(Color.WHITE)
-
             val search = findViewById<EditText>(R.id.searchBar)
             search.background = GradientDrawable().apply {
-                setColor(0x55FFFFFF)
-                cornerRadius = 26f * resources.displayMetrics.density
-                setStroke(
-                    (1 * resources.displayMetrics.density).toInt(),
-                    currentAccent
-                )
+                setColor(0x35FFFFFF)
+                cornerRadius = dp(28).toFloat()
+                setStroke(dp(1), currentAccent)
             }
         }
     }
 
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+
     override fun onResume() {
         super.onResume()
+        updateDateAndClock()
+        applyWallpaperBackground()
         if (!receiverRegistered) {
             val filter = IntentFilter(Intent.ACTION_WALLPAPER_CHANGED)
-            if (Build.VERSION.SDK_INT >= 33) {
-                registerReceiver(wallpaperReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-            } else {
+            if (Build.VERSION.SDK_INT >= 33) registerReceiver(wallpaperReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            else {
                 @Suppress("DEPRECATION")
                 registerReceiver(wallpaperReceiver, filter)
             }
@@ -184,19 +228,12 @@ class MainActivity : Activity() {
     }
 
     override fun onPause() {
-        if (receiverRegistered) {
-            unregisterReceiver(wallpaperReceiver)
-            receiverRegistered = false
-        }
+        if (receiverRegistered) { unregisterReceiver(wallpaperReceiver); receiverRegistered = false }
         super.onPause()
     }
 
     @Deprecated("Use OnBackPressedDispatcher in a future UI migration")
     override fun onBackPressed() {
-        if (drawer.visibility == View.VISIBLE) {
-            drawer.visibility = View.GONE
-        } else {
-            super.onBackPressed()
-        }
+        if (drawer.visibility == View.VISIBLE) drawer.visibility = View.GONE else super.onBackPressed()
     }
 }

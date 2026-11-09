@@ -1,32 +1,35 @@
-# MyLauncher Android Project
+# MyLauncher — ColorOS-inspired UI update
 
-A starter native Android launcher project using Kotlin, XML Views, RecyclerView, ViewPager2, Jetpack Palette, and a floating Fluid Cloud overlay.
+A native Android launcher project using Kotlin, XML Views, RecyclerView and ViewPager2.
 
-## Project details
-
-- Application ID: `com.example.mylauncher`
-- Minimum Android version: Android 8.0 (API 26)
+## Project configuration
+- Application ID / namespace: `com.example.mylauncher`
+- Minimum SDK: 26 (Android 8.0)
 - Compile SDK: 35
 - Target SDK: 34
-- JDK: 17
 - Android Gradle Plugin: 8.6.1
+- Kotlin: 2.0.20
+- JDK: 17
 - Gradle: 8.7
 
-## Build on GitHub
+## UI changes in this revision
+- Uses the current system wallpaper as the home background, with a dark gradient overlay for icon readability.
+- Large live clock and date header.
+- Five-column home app grid and page indicator.
+- Rounded translucent dock populated from apps installed on the device (common phone, messaging, browser and photos apps when available; other apps fill remaining spaces).
+- Rounded translucent controls and a full-height translucent app drawer with search.
+- Existing app discovery, app launching, page transition, wallpaper palette extraction, and Fluid Cloud overlay entry point retained.
+- Existing GitHub Actions workflow still builds `:app:assembleDebug` and uploads the Debug APK artifact.
 
-1. Create a new GitHub repository.
-2. Extract this ZIP and upload all files and folders to the repository root.
-3. Commit the files to `main` (or `master`).
-4. Open the repository's **Actions** tab.
-5. Select **Build MyLauncher APK** and wait for the workflow to finish.
-6. Open the successful workflow run and download the `MyLauncher-debug-apk` artifact.
-7. Extract the artifact ZIP to get `app-debug.apk`.
+## Important limitations
+- This is a ColorOS-inspired independent launcher UI, not OPPO's proprietary ColorOS launcher and not a byte-for-byte recreation.
+- The translucent surfaces are not true real-time wallpaper blur. Android does not let a normal launcher blur arbitrary wallpaper behind every view through `RenderEffect` alone.
+- Weather, widgets, editable icon placement, icon packs, gestures, and a complete settings screen are not implemented in this revision.
+- Fluid Cloud remains a basic overlay prototype and may require Android overlay and foreground-service permissions.
+- Clock/date refresh on activity resume; this is not a continuously ticking clock widget.
 
-The workflow builds a debug APK. It does not sign a release APK for Play Store distribution.
-
-## Build locally in AndroidIDE
-
-Open the project root in AndroidIDE and run:
+## Build
+Run from the project root:
 
 ```bash
 gradle assembleDebug
@@ -36,32 +39,6 @@ APK output:
 
 `app/build/outputs/apk/debug/app-debug.apk`
 
-Use JDK 17 and Gradle 8.7.
+GitHub Actions: push the project to the `main` or `master` branch, then open **Actions → Build MyLauncher APK**. Download the `MyLauncher-debug-apk` artifact after a successful run.
 
-## Features in this starter
-
-- Android HOME launcher intent filter and normal app-drawer launch icon.
-- Installed app discovery and launching.
-- Four-column app grids.
-- Three-dimensional ViewPager2 page transition.
-- Searchable app drawer with translucent glass-style background.
-- Wallpaper palette extraction and refresh on resume / wallpaper-change broadcast.
-- Optional Fluid Cloud overlay with a foreground notification and spring scale animation.
-
-## Important limitations
-
-- The drawer is translucent; this project does not claim true real-time wallpaper blur behind the drawer.
-- Fluid Cloud is a basic floating pill, not a full media controller or notification aggregator.
-- Overlay permission must be granted manually in Android Settings.
-- Android may stop foreground services due to system policy, battery management, or user action.
-- The punch-hole/camera position is not automatically detected.
-- 120 FPS is not guaranteed; actual frame rate depends on the device and workload.
-- This source has not been built on your phone. Use GitHub Actions or AndroidIDE to verify it, and inspect the build log if it fails.
-
-## Set as default launcher
-
-After installing the APK:
-
-Settings -> Apps -> Default apps -> Home app -> MyLauncher
-
-Menu names vary by phone manufacturer.
+The source update has not been compiled in this environment. Verify it with GitHub Actions or AndroidIDE before installing. If the build fails, share the complete first Gradle error block for diagnosis.

@@ -17,9 +17,9 @@ class WorkspaceAdapter(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            layoutManager = GridLayoutManager(parent.context, 4)
+            layoutManager = GridLayoutManager(parent.context, 5)
             overScrollMode = View.OVER_SCROLL_NEVER
-            setPadding(0, 12, 0, 12)
+            setPadding(0, (8 * parent.context.resources.displayMetrics.density).toInt(), 0, (8 * parent.context.resources.displayMetrics.density).toInt())
             clipToPadding = false
         }
         return PageViewHolder(recycler)

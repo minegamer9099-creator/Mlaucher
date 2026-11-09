@@ -2,15 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="104dp"
+    android:minHeight="96dp"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="8dp">
 
     <ImageView
         android:id="@+id/appIcon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:scaleType="fitCenter"
         android:contentDescription="@null" />
 
@@ -23,5 +23,5 @@
         android:maxLines="2"
         android:ellipsize="end"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="11sp" />
 </LinearLayout>
