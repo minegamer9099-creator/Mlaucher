@@ -17,7 +17,7 @@ class WorkspaceAdapter(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            layoutManager = GridLayoutManager(parent.context, 5)
+            layoutManager = GridLayoutManager(parent.context, 4)
             overScrollMode = View.OVER_SCROLL_NEVER
             setPadding(0, (8 * parent.context.resources.displayMetrics.density).toInt(), 0, (8 * parent.context.resources.displayMetrics.density).toInt())
             clipToPadding = false

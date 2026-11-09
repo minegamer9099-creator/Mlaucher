@@ -3,13 +3,7 @@
     android:id="@+id/rootContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#17202B">
-
-    <View
-        android:id="@+id/wallpaperScrim"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/wallpaper_scrim" />
+    android:background="@drawable/coloros_wallpaper">
 
     <LinearLayout
         android:id="@+id/homeContent"
@@ -18,41 +12,34 @@
         android:orientation="vertical"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        android:paddingTop="30dp"
-        android:paddingBottom="18dp">
+        android:paddingTop="42dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
+            android:id="@+id/clockHeader"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="8dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="20dp">
-            <TextView
-                android:id="@+id/clockText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="9:41"
-                android:textColor="#FFFFFFFF"
-                android:textSize="54sp"
-                android:fontFamily="sans-serif-light"
-                android:letterSpacing="-0.04" />
+            android:layout_height="220dp"
+            android:gravity="center"
+            android:orientation="vertical">
             <TextView
                 android:id="@+id/dateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-2dp"
-                android:text="Monday, 9 November"
-                android:textColor="#E8FFFFFF"
-                android:textSize="15sp" />
+                android:text="OCT 13 TUE"
+                android:textColor="#DDEBEEFF"
+                android:textSize="12sp"
+                android:letterSpacing="0.08" />
             <TextView
-                android:id="@+id/greetingText"
+                android:id="@+id/clockText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:text="Your day, at a glance"
-                android:textColor="#DFFFFFFF"
-                android:textSize="13sp" />
+                android:layout_marginTop="-4dp"
+                android:text="10:00"
+                android:textColor="#FFF7F7FF"
+                android:textSize="76sp"
+                android:fontFamily="sans-serif-thin"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.06" />
         </LinearLayout>
 
         <androidx.viewpager2.widget.ViewPager2
@@ -67,51 +54,32 @@
         <LinearLayout
             android:id="@+id/pageDots"
             android:layout_width="match_parent"
-            android:layout_height="22dp"
+            android:layout_height="24dp"
             android:gravity="center"
             android:orientation="horizontal" />
 
         <LinearLayout
             android:id="@+id/dockContainer"
             android:layout_width="match_parent"
-            android:layout_height="78dp"
-            android:layout_marginTop="6dp"
+            android:layout_height="62dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="12dp"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:background="@drawable/dock_background" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/drawerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:gravity="center"
-                android:paddingStart="26dp"
-                android:paddingEnd="26dp"
-                android:text="All apps  ⌃"
-                android:textColor="#FFFFFFFF"
-                android:textSize="13sp"
-                android:background="@drawable/chip_background" />
-            <TextView
-                android:id="@+id/fluidCloudButton"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="10dp"
-                android:gravity="center"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="Fluid Cloud"
-                android:textColor="#FFFFFFFF"
-                android:textSize="13sp"
-                android:background="@drawable/chip_background" />
-        </LinearLayout>
+        <View
+            android:id="@+id/drawerHandle"
+            android:layout_width="38dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/gesture_handle"
+            android:contentDescription="Open app drawer" />
     </LinearLayout>
 
     <LinearLayout
@@ -125,7 +93,6 @@
         android:paddingBottom="20dp"
         android:background="@drawable/drawer_background"
         android:visibility="gone">
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

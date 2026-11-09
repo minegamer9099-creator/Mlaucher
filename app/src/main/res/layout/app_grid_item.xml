@@ -2,26 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="96dp"
+    android:minHeight="104dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="8dp">
-
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:paddingTop="7dp"
+    android:paddingBottom="7dp">
     <ImageView
         android:id="@+id/appIcon"
-        android:layout_width="52dp"
-        android:layout_height="52dp"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
         android:scaleType="fitCenter"
         android:contentDescription="@null" />
-
     <TextView
         android:id="@+id/appName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="5dp"
         android:gravity="center"
-        android:maxLines="2"
+        android:maxLines="1"
         android:ellipsize="end"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp" />
+        android:textColor="#FFF7F7FF"
+        android:textSize="10sp" />
 </LinearLayout>

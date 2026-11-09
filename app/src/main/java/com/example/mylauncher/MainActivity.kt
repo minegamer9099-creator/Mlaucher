@@ -11,7 +11,6 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -22,7 +21,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -74,13 +72,13 @@ class MainActivity : Activity() {
     private fun updateDateAndClock() {
         val now = Date()
         findViewById<TextView>(R.id.clockText).text = SimpleDateFormat("h:mm", Locale.getDefault()).format(now)
-        findViewById<TextView>(R.id.dateText).text = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(now)
+        findViewById<TextView>(R.id.dateText).text = SimpleDateFormat("MMM d EEE", Locale.getDefault()).format(now).uppercase(Locale.getDefault())
     }
 
     private fun applyWallpaperBackground() {
         try {
             val wallpaper = WallpaperManager.getInstance(this).drawable
-            findViewById<View>(R.id.rootContainer)?.background = wallpaper
+            if (wallpaper != null) findViewById<View>(R.id.rootContainer)?.background = wallpaper
         } catch (_: Exception) {
             findViewById<View>(R.id.rootContainer)?.setBackgroundColor(0xFF263449.toInt())
         }
@@ -106,7 +104,7 @@ class MainActivity : Activity() {
     }
 
     private fun setupWorkspace() {
-        val pages = if (allApps.isEmpty()) listOf(emptyList()) else allApps.chunked(20)
+        val pages = if (allApps.isEmpty()) listOf(emptyList()) else allApps.chunked(8)
         viewPager.adapter = WorkspaceAdapter(pages, ::launchApp)
         viewPager.setPageTransformer(ColorOSPageTransformer(this))
         viewPager.offscreenPageLimit = 1
@@ -156,7 +154,7 @@ class MainActivity : Activity() {
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 contentDescription = app.label
                 setPadding(dp(9), dp(9), dp(9), dp(9))
-                layoutParams = LinearLayout.LayoutParams(0, dp(62), 1f)
+                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f)
                 setOnClickListener { launchApp(app) }
             }
             dock.addView(icon)
@@ -179,19 +177,14 @@ class MainActivity : Activity() {
         })
     }
 
+    private fun openDrawer() {
+        drawer.visibility = View.VISIBLE
+        findViewById<EditText>(R.id.searchBar).setText("")
+    }
+
     private fun setupButtons() {
-        findViewById<TextView>(R.id.drawerButton).setOnClickListener {
-            drawer.visibility = View.VISIBLE
-            findViewById<EditText>(R.id.searchBar).setText("")
-        }
+        findViewById<View>(R.id.drawerHandle).setOnClickListener { openDrawer() }
         findViewById<TextView>(R.id.closeDrawerButton).setOnClickListener { drawer.visibility = View.GONE }
-        findViewById<TextView>(R.id.fluidCloudButton).setOnClickListener {
-            if (!Settings.canDrawOverlays(this)) {
-                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-            } else {
-                ContextCompat.startForegroundService(this, Intent(this, FluidCloudService::class.java))
-            }
-        }
     }
 
     private fun refreshWallpaperTheme() {

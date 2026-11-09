@@ -42,3 +42,7 @@ APK output:
 GitHub Actions: push the project to the `main` or `master` branch, then open **Actions → Build MyLauncher APK**. Download the `MyLauncher-debug-apk` artifact after a successful run.
 
 The source update has not been compiled in this environment. Verify it with GitHub Actions or AndroidIDE before installing. If the build fails, share the complete first Gradle error block for diagnosis.
+
+
+## Reference-style home screen update
+The home screen has been restyled toward the supplied ColorOS 17 reference: centered compact date, oversized thin digital clock, four-column/two-row app pages, a four-icon dock, page dots, and a small app-drawer handle. The default fallback wallpaper is a purple-to-orange gradient; the launcher may display the device wallpaper when Android exposes it. App icons are loaded from installed apps, so their exact artwork depends on the device and installed icon packs. This is a ColorOS-inspired design, not OPPO's proprietary launcher or icon assets.
